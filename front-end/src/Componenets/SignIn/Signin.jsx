@@ -1,49 +1,49 @@
 import React, { useState } from "react";
-import "./Signin.css";
 import axios from "axios";
-import password_icon from "../Assets/password.png";
-import email_icon from "../Assets/mail.png";
-import validation from "./SigninValidation";
-import { useNavigate } from "react-router-dom";
+import "./Signin.css"; // Import the CSS file
+import password_icon from "../Assets/password.png"; // Import the password icon
+import email_icon from "../Assets/mail.png"; // Import the email icon
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
-export const SignIn = () => {
-  const [values, setValues] = useState({
-    email: "",
-    password: "",
-  });
-  const handleDeleSignin = () => {
-    navigate("/front-end/src/Componenets/Navbar");
-  };
-  const navigate = useNavigate();
+export function SignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [errors, setErrors] = useState({});
+  const navigate = useNavigate(); // Initialize useNavigate
 
-  const handleInput = (event) => {
-    const { name, value } = event.target;
-    setValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Print payload to verify it
+    const payload = { email, password };
+    console.log("Payload being sent:", payload);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4308/login/user",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data);
+      if (response.data === "Success") {
+        navigate("/front-end/src/Componenets/Navbar"); // Navigate to the Navbar page after successful login
+      } else {
+        setError("No record existed");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data || "Login failed";
+      console.error("Login failed:", errorMessage);
+      setError(errorMessage);
+    }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const validationErrors = validation(values);
-    setErrors(validationErrors);
-
-    // Check if there are no errors
-    if (Object.keys(validationErrors).length === 0) {
-      axios
-        .post("http://localhost:4308/login", values)
-        .then((res) => {
-          if (res.data === "Success") {
-            navigate("/front-end/src/Componenets/Navbar");
-          } else {
-            alert("No record existed");
-          }
-        })
-        .catch((err) => console.log(err));
-    }
+  const handleForgotPassword = () => {
+    navigate("/forgotpass"); // Navigate to forgot password page
   };
 
   return (
@@ -58,23 +58,22 @@ export const SignIn = () => {
           <input
             type="email"
             placeholder="Email Id"
-            name="email"
-            value={values.email}
-            onChange={handleInput}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
-        {errors.email && <p className="error">{errors.email}</p>}
         <div className="input">
           <img src={password_icon} alt="password icon" />
           <input
             type="password"
             placeholder="Password"
-            name="password"
-            value={values.password}
-            onChange={handleInput}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
-        {errors.password && <p className="error">{errors.password}</p>}
+        {error && <p className="error">{error}</p>}
         <div className="Remember-forgot-container">
           <div className="Remember-me">
             <label>
@@ -88,17 +87,16 @@ export const SignIn = () => {
             </label>
           </div>
           <div className="forgot-password">
-            Forgot Password? <span className="click-here">Click Here</span>
+            Forgot Password?{" "}
+            <span className="click-here" onClick={handleForgotPassword}>
+              Click Here
+            </span>
           </div>
         </div>
-        <button
-          type="submit"
-          className="submit-button"
-          onClick={handleDeleSignin}
-        >
+        <button type="submit" className="submit-button">
           <div className="Sign-in">Sign In</div>
         </button>
       </form>
     </div>
   );
-};
+}
