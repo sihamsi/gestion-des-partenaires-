@@ -3,8 +3,11 @@ import "./navbar.css";
 import logo from "../Assets/cashplus.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import companyLogo from "../Assets/companyLogo.png";
+import mobilabLogo from "../Assets/mobilabLogo.png";
 const Navbar = () => {
   const navigate = useNavigate();
   const [partenaires, setPartenaires] = useState([]);
@@ -70,12 +73,20 @@ const Navbar = () => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
+    // Conserver les anciens fichiers si aucun nouveau fichier n'est sélectionné
     if (!formData.get("logo")) {
       formData.delete("logo");
     }
-
     if (!formData.get("icon")) {
       formData.delete("icon");
+    }
+
+    // Ajouter les anciens fichiers si les nouveaux fichiers ne sont pas fournis
+    if (!formData.get("logo")) {
+      formData.append("logo", editingPartenaire.logo);
+    }
+    if (!formData.get("icon")) {
+      formData.append("icon", editingPartenaire.icon);
     }
 
     try {
@@ -117,6 +128,47 @@ const Navbar = () => {
     setAddModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    // Add the company logo at the beginning
+    const img = new Image();
+    img.src = companyLogo;
+    doc.addImage(img, "PNG", 14, 10, 20, 10);
+
+    const img2 = new Image();
+    img2.src = mobilabLogo;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.addImage(img2, "PNG", 176, 10, 20, 10);
+
+    // Position the title below the logo
+    const startY = 40; // Adjust this value based on your logo's size
+    doc.setFontSize(30);
+    doc.text("Liste des Partenaires", pageWidth / 2, startY, {
+      align: "center",
+    });
+    doc.autoTable({
+      startY: startY + 10,
+      head: [["Type", "Code", "Nom", "Contact"]],
+      body: partenaires.map((partenaire) => [
+        partenaire.type,
+        partenaire.code,
+        partenaire.nom,
+        partenaire.contact,
+      ]),
+    });
+
+    doc.setFontSize(10);
+    const companyDetails = `
+    MOBILAB, Au capital de 500 000.00 Dhs, RC: 322315-IF: 15251121-TP: 34754073-ICE001737039000029
+            Angle Bd Abdelmoumen, 1 Rue des pléiades, Quartier des Hôpitaux 4éme étage Casablanca-Maroc
+                                  Tél :(212)0522 86 37 73/0675 37 76 59 Fax : (212)05 22 86 37 79
+  `;
+    doc.text(companyDetails, 14, doc.internal.pageSize.height - 30);
+
+    doc.save("partenaires.pdf");
   };
 
   return (
@@ -281,7 +333,7 @@ const Navbar = () => {
                         type="file"
                         name="logo"
                         className="form-control"
-                        required
+                        accept="image/*"
                       />
                     </div>
                     <div className="mb-3">
@@ -290,19 +342,19 @@ const Navbar = () => {
                         type="file"
                         name="icon"
                         className="form-control"
-                        required
+                        accept="image/*"
                       />
                     </div>
                     <div className="modal-footer">
+                      <button type="submit" className="btn btn-primary">
+                        Ajouter
+                      </button>
                       <button
                         type="button"
                         className="btn btn-secondary"
                         onClick={closeModal}
                       >
                         Annuler
-                      </button>
-                      <button type="submit" className="btn btn-primary">
-                        Ajouter
                       </button>
                     </div>
                   </form>
@@ -311,8 +363,9 @@ const Navbar = () => {
             </div>
           </div>
         )}
+
         {/* Edit Modal */}
-        {editModalOpen && (
+        {editModalOpen && editingPartenaire && (
           <div
             className="modal fade show"
             style={{ display: "block" }}
@@ -375,22 +428,66 @@ const Navbar = () => {
                     </div>
                     <div className="mb-3">
                       <label>Logo:</label>
-                      <input type="file" name="logo" className="form-control" />
+                      {editingPartenaire.logo && (
+                        <div>
+                          <img
+                            src={`http://localhost:4308/uploads/${editingPartenaire.logo}`}
+                            alt="Logo"
+                            style={{ width: "50px" }}
+                          />
+                          <input
+                            type="file"
+                            name="logo"
+                            className="form-control"
+                            accept="image/*"
+                          />
+                        </div>
+                      )}
+                      {!editingPartenaire.logo && (
+                        <input
+                          type="file"
+                          name="logo"
+                          className="form-control"
+                          accept="image/*"
+                        />
+                      )}
                     </div>
                     <div className="mb-3">
                       <label>Icon:</label>
-                      <input type="file" name="icon" className="form-control" />
+                      {editingPartenaire.icon && (
+                        <div>
+                          <img
+                            src={`http://localhost:4308/uploads/${editingPartenaire.icon}`}
+                            alt="Icon"
+                            style={{ width: "50px" }}
+                          />
+                          <input
+                            type="file"
+                            name="icon"
+                            className="form-control"
+                            accept="image/*"
+                          />
+                        </div>
+                      )}
+                      {!editingPartenaire.icon && (
+                        <input
+                          type="file"
+                          name="icon"
+                          className="form-control"
+                          accept="image/*"
+                        />
+                      )}
                     </div>
                     <div className="modal-footer">
+                      <button type="submit" className="btn btn-primary">
+                        Modifier
+                      </button>
                       <button
                         type="button"
                         className="btn btn-secondary"
                         onClick={closeModal}
                       >
                         Annuler
-                      </button>
-                      <button type="submit" className="btn btn-primary">
-                        Modifier
                       </button>
                     </div>
                   </form>
@@ -399,6 +496,7 @@ const Navbar = () => {
             </div>
           </div>
         )}
+
         {/* Delete Modal */}
         {deleteModalOpen && (
           <div
@@ -415,16 +513,12 @@ const Navbar = () => {
                   </button>
                 </div>
                 <div className="modal-body">
-                  <p>Voulez-vous vraiment supprimer ce partenaire ?</p>
+                  <p>
+                    Êtes-vous sûr de vouloir supprimer ce partenaire ? Cette
+                    action est irréversible.
+                  </p>
                 </div>
                 <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={closeModal}
-                  >
-                    Annuler
-                  </button>
                   <button
                     type="button"
                     className="btn btn-danger"
@@ -432,11 +526,26 @@ const Navbar = () => {
                   >
                     Supprimer
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={closeModal}
+                  >
+                    Annuler
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        <button
+          className="btn btn-secondary"
+          onClick={generatePDF}
+          style={{ marginTop: "20px" }}
+        >
+          Exporter en PDF
+        </button>
       </div>
     </div>
   );
