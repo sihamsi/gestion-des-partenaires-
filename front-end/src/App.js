@@ -4,8 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SignIn } from "./Componenets/SignIn/Signin";
 import Navbar from "./Componenets/Navbar/Navbar";
 import ForgotPassword from "./Componenets/ForgotPassword/ForgotPassword";
-//import Ajouter from "./Componenets/Ajouter/Ajouter";
-//import PrivateRoute from "./Componenets/PrivateRoute";
 
 function App() {
   return (
