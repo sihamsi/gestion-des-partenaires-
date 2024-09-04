@@ -1,15 +1,21 @@
-function validation(values) {
-  let error = {};
-  const email_pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validation = (values) => {
+  let errors = {};
 
-  if (values.email === "") {
-    error.email = "Name should not be empty";
-  } else if (!email_pattern.test(values.email)) {
-    error.email = "Email Didn't match";
-  } else {
-    error.email = "";
+  // Validate email
+  if (!values.email) {
+    errors.email = "Email is required"; // Error if email is empty
+  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
+    errors.email = "Email address is invalid"; // Error if email format is incorrect
   }
 
-  return error;
-}
+  // Validate password
+  if (!values.password) {
+    errors.password = "Password is required"; // Error if password is empty
+  } else if (values.password.length < 6) {
+    errors.password = "Password needs to be 6 characters or more"; // Error if password is too short
+  }
+
+  return errors;
+};
+
 export default validation;
