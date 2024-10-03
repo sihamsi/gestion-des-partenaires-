@@ -8,9 +8,12 @@ import "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
 import companyLogo from "../Assets/companyLogo.png";
 import mobilabLogo from "../Assets/mobilabLogo.png";
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [partenaires, setPartenaires] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+  const [filteredPartenaires, setFilteredPartenaires] = useState([]); // State for filtered partners
   const [errors, setErrors] = useState([]);
   const [success, setSuccess] = useState("");
   const [editingPartenaire, setEditingPartenaire] = useState(null);
@@ -30,16 +33,37 @@ const Navbar = () => {
         { withCredentials: true }
       );
       setPartenaires(response.data);
+      setFilteredPartenaires(response.data); // Initialize filtered partners with all partners
     } catch (error) {
       console.error("Error fetching partenaires:", error);
       setErrors([error.message]);
     }
   };
 
+  // Handle search function
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") {
+      // If search query is empty, show all partenaires
+      setFilteredPartenaires(partenaires);
+    } else {
+      const filtered = partenaires.filter(
+        (partenaire) =>
+          partenaire.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          partenaire.code.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredPartenaires(filtered);
+    }
+  };
+
+  const handleHome = () => {
+    navigate("/front-end/src/Componenets/HomePage");
+  };
+
   const handleLogout = () => {
     navigate("/");
   };
 
+  // Handle Add Partenaire
   const handleAddPartenaire = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -52,7 +76,7 @@ const Navbar = () => {
         }
       );
       console.log("Add response:", response);
-      setSuccess("Partenaire added successfully");
+      setSuccess("Partenaire ajouté avec succès");
       await fetchPartenaires();
       event.target.reset();
       setErrors([]);
@@ -63,6 +87,7 @@ const Navbar = () => {
     }
   };
 
+  // Handle Edit Partenaire
   const handleEditPartenaire = (id) => {
     const partenaire = partenaires.find((p) => p.id === id);
     setEditingPartenaire(partenaire);
@@ -96,7 +121,7 @@ const Navbar = () => {
         { withCredentials: true }
       );
       console.log("Update response:", response);
-      setSuccess("Partenaire updated successfully");
+      setSuccess("Partenaire mis à jour avec succès");
       await fetchPartenaires();
       setEditingPartenaire(null);
       setErrors([]);
@@ -107,13 +132,14 @@ const Navbar = () => {
     }
   };
 
+  // Handle Delete Partenaire
   const handleDeletePartenaire = async () => {
     try {
       await axios.delete(
         `http://localhost:4308/login/partenaires/${deletingPartenaire}`,
         { withCredentials: true }
       );
-      setSuccess("Partenaire deleted successfully");
+      setSuccess("Partenaire supprimé avec succès");
       await fetchPartenaires();
       setDeletingPartenaire(null);
       setErrors([]);
@@ -130,6 +156,7 @@ const Navbar = () => {
     setDeleteModalOpen(false);
   };
 
+  // Handle PDF Generation
   const generatePDF = () => {
     const doc = new jsPDF();
 
@@ -173,45 +200,105 @@ const Navbar = () => {
 
   return (
     <div>
-      <nav className="navbar">
-        <img src={logo} alt="Logo" className="logo" />
-        <label className="home">Home</label>
-        <ul className="nav">
-          <li className="services">Services</li>
-          <li className="logout">
-            <button className="btn" onClick={handleLogout}>
-              Log Out
-            </button>
-          </li>
-        </ul>
+      {/* Navbar */}
+      <nav className="navbar navbar-expand-lg navbar-light bg-secondary">
+        <div className="container-fluid">
+          <img src={logo} alt="Logo" className="logo" />
+
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <a className="nav-link" href="#" onClick={handleHome}>
+                  Home
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#">
+                  Services
+                </a>
+              </li>
+              <li className="nav-item">
+                <button className="btn btn-danger" onClick={handleLogout}>
+                  Log Out
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
 
-      <div className="admin-dashboard">
+      {/* Admin Dashboard */}
+      <div className="admin-dashboard container mt-4">
         <h1>Gestion des Partenaires</h1>
+
+        {/* Error Messages */}
         {errors.length > 0 && (
-          <div className="alert alert-danger">
+          <div className="alert alert-danger mt-3">
             {errors.map((error, index) => (
               <p key={index}>{error}</p>
             ))}
           </div>
         )}
+
+        {/* Success Message */}
         {success && (
-          <div className="alert alert-success">
+          <div className="alert alert-success mt-3">
             <p>{success}</p>
           </div>
         )}
-        <button
-          className="btn btn-primary"
-          onClick={() => setAddModalOpen(true)}
-        >
-          Ajouter
-        </button>
-        <br></br>
-        <br></br>
-        <table className="table table-striped table-bordered">
+
+        {/* Search Bar */}
+        <div className="search-bar d-flex mt-4">
+          <input
+            type="text"
+            placeholder="Rechercher un partenaire par Nom ou Code"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} // Update search query on input change
+            className="form-control me-2"
+          />
+          <button className="btn btn-primary" onClick={handleSearch}>
+            Rechercher
+          </button>
+          <button
+            className="btn btn-secondary ms-2"
+            onClick={() => {
+              setSearchQuery("");
+              setFilteredPartenaires(partenaires);
+            }}
+          >
+            Réinitialiser
+          </button>
+        </div>
+
+        {/* Add Partenaire Button */}
+        <div className="mt-4">
+          <button
+            className="btn btn-primary"
+            onClick={() => setAddModalOpen(true)}
+          >
+            Ajouter un Partenaire
+          </button>
+          <button className="btn btn-secondary ms-3" onClick={generatePDF}>
+            Exporter en PDF
+          </button>
+        </div>
+
+        {/* Partenaires Table */}
+        <table className="table table-striped table-bordered mt-3">
           <thead>
-            <tr style={{ backgroundColor: "#000" }}>
-              <th colSpan="7" className="toto">
+            <tr style={{ backgroundColor: "#000", color: "#fff" }}>
+              <th colSpan="7" className="text-center">
                 Liste des Partenaires
               </th>
             </tr>
@@ -226,52 +313,60 @@ const Navbar = () => {
             </tr>
           </thead>
           <tbody>
-            {partenaires.map((partenaire) => (
-              <tr key={partenaire.id}>
-                <td>{partenaire.type}</td>
-                <td>{partenaire.code}</td>
-                <td>{partenaire.nom}</td>
-                <td>{partenaire.contact}</td>
-                <td>
-                  {partenaire.logo && (
-                    <img
-                      src={`http://localhost:4308/uploads/${partenaire.logo}`}
-                      alt="Logo"
-                      style={{ width: "50px" }}
-                    />
-                  )}
-                </td>
-                <td>
-                  {partenaire.icon && (
-                    <img
-                      src={`http://localhost:4308/uploads/${partenaire.icon}`}
-                      alt="Icon"
-                      style={{ width: "50px" }}
-                    />
-                  )}
-                </td>
-                <td>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => handleEditPartenaire(partenaire.id)}
-                  >
-                    Modifier
-                  </button>{" "}
-                  &nbsp;
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => {
-                      setDeletingPartenaire(partenaire.id);
-                      setDeleteModalOpen(true);
-                    }}
-                  >
-                    Supprimer
-                  </button>
+            {filteredPartenaires.length > 0 ? (
+              filteredPartenaires.map((partenaire) => (
+                <tr key={partenaire.id}>
+                  <td>{partenaire.type}</td>
+                  <td>{partenaire.code}</td>
+                  <td>{partenaire.nom}</td>
+                  <td>{partenaire.contact}</td>
+                  <td>
+                    {partenaire.logo && (
+                      <img
+                        src={`http://localhost:4308/uploads/${partenaire.logo}`}
+                        alt="Logo"
+                        style={{ width: "50px" }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    {partenaire.icon && (
+                      <img
+                        src={`http://localhost:4308/uploads/${partenaire.icon}`}
+                        alt="Icon"
+                        style={{ width: "50px" }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-warning me-2"
+                      onClick={() => handleEditPartenaire(partenaire.id)}
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => {
+                        setDeletingPartenaire(partenaire.id);
+                        setDeleteModalOpen(true);
+                      }}
+                    >
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  Aucun partenaire trouvé.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
+
         {/* Add Modal */}
         {addModalOpen && (
           <div
@@ -283,9 +378,11 @@ const Navbar = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Ajouter un Partenaire</h5>
-                  <button type="button" className="close" onClick={closeModal}>
-                    &times;
-                  </button>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={closeModal}
+                  ></button>
                 </div>
                 <div className="modal-body">
                   <form
@@ -293,15 +390,23 @@ const Navbar = () => {
                     encType="multipart/form-data"
                   >
                     <div className="mb-3">
-                      <label>Type:</label>
-                      <select className="form-control" name="type">
-                        <option value="MTO">MTO</option>
-                        <option value="Marchand">Marchand</option>
-                        <option value="Facturier">Facturier</option>
+                      <label className="form-label">Type:</label>
+                      <select className="form-control" name="type" required>
+                        <option value="">Sélectionnez le type</option>
+                        <option value="Voyage">Voyage</option>
+                        <option value="Telecom">Telecom</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Taxes et impôts">Taxes et impôts</option>
+                        <option value="Assurances">Assurances</option>
+                        <option value="Régie">Régie</option>
+                        <option value="Industrie & FMCG">
+                          Industrie & FMCG
+                        </option>
                       </select>
                     </div>
                     <div className="mb-3">
-                      <label>Code:</label>
+                      <label className="form-label">Code:</label>
                       <input
                         type="text"
                         name="code"
@@ -310,7 +415,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Nom:</label>
+                      <label className="form-label">Nom:</label>
                       <input
                         type="text"
                         name="nom"
@@ -319,7 +424,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Contact:</label>
+                      <label className="form-label">Contact:</label>
                       <input
                         type="text"
                         name="contact"
@@ -328,7 +433,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Logo:</label>
+                      <label className="form-label">Logo:</label>
                       <input
                         type="file"
                         name="logo"
@@ -337,7 +442,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Icon:</label>
+                      <label className="form-label">Icon:</label>
                       <input
                         type="file"
                         name="icon"
@@ -375,9 +480,11 @@ const Navbar = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Modifier un Partenaire</h5>
-                  <button type="button" className="close" onClick={closeModal}>
-                    &times;
-                  </button>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={closeModal}
+                  ></button>
                 </div>
                 <div className="modal-body">
                   <form
@@ -385,19 +492,28 @@ const Navbar = () => {
                     encType="multipart/form-data"
                   >
                     <div className="mb-3">
-                      <label>Type:</label>
+                      <label className="form-label">Type:</label>
                       <select
                         className="form-control"
                         name="type"
                         defaultValue={editingPartenaire.type}
+                        required
                       >
-                        <option value="MTO">MTO</option>
-                        <option value="Marchand">Marchand</option>
-                        <option value="Facturier">Facturier</option>
+                        <option value="">Sélectionnez le type</option>
+                        <option value="Voyage">Voyage</option>
+                        <option value="Telecom">Telecom</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Taxes et impôts">Taxes et impôts</option>
+                        <option value="Assurances">Assurances</option>
+                        <option value="Régie">Régie</option>
+                        <option value="Industrie & FMCG">
+                          Industrie & FMCG
+                        </option>
                       </select>
                     </div>
                     <div className="mb-3">
-                      <label>Code:</label>
+                      <label className="form-label">Code:</label>
                       <input
                         type="text"
                         name="code"
@@ -407,7 +523,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Nom:</label>
+                      <label className="form-label">Nom:</label>
                       <input
                         type="text"
                         name="nom"
@@ -417,7 +533,7 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Contact:</label>
+                      <label className="form-label">Contact:</label>
                       <input
                         type="text"
                         name="contact"
@@ -427,56 +543,40 @@ const Navbar = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label>Logo:</label>
+                      <label className="form-label">Logo:</label>
                       {editingPartenaire.logo && (
-                        <div>
+                        <div className="mb-2">
                           <img
                             src={`http://localhost:4308/uploads/${editingPartenaire.logo}`}
                             alt="Logo"
                             style={{ width: "50px" }}
                           />
-                          <input
-                            type="file"
-                            name="logo"
-                            className="form-control"
-                            accept="image/*"
-                          />
                         </div>
                       )}
-                      {!editingPartenaire.logo && (
-                        <input
-                          type="file"
-                          name="logo"
-                          className="form-control"
-                          accept="image/*"
-                        />
-                      )}
+                      <input
+                        type="file"
+                        name="logo"
+                        className="form-control"
+                        accept="image/*"
+                      />
                     </div>
                     <div className="mb-3">
-                      <label>Icon:</label>
+                      <label className="form-label">Icon:</label>
                       {editingPartenaire.icon && (
-                        <div>
+                        <div className="mb-2">
                           <img
                             src={`http://localhost:4308/uploads/${editingPartenaire.icon}`}
                             alt="Icon"
                             style={{ width: "50px" }}
                           />
-                          <input
-                            type="file"
-                            name="icon"
-                            className="form-control"
-                            accept="image/*"
-                          />
                         </div>
                       )}
-                      {!editingPartenaire.icon && (
-                        <input
-                          type="file"
-                          name="icon"
-                          className="form-control"
-                          accept="image/*"
-                        />
-                      )}
+                      <input
+                        type="file"
+                        name="icon"
+                        className="form-control"
+                        accept="image/*"
+                      />
                     </div>
                     <div className="modal-footer">
                       <button type="submit" className="btn btn-primary">
@@ -508,9 +608,11 @@ const Navbar = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Supprimer un Partenaire</h5>
-                  <button type="button" className="close" onClick={closeModal}>
-                    &times;
-                  </button>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={closeModal}
+                  ></button>
                 </div>
                 <div className="modal-body">
                   <p>
@@ -538,14 +640,6 @@ const Navbar = () => {
             </div>
           </div>
         )}
-
-        <button
-          className="btn btn-secondary"
-          onClick={generatePDF}
-          style={{ marginTop: "20px" }}
-        >
-          Exporter en PDF
-        </button>
       </div>
     </div>
   );

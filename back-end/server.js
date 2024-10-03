@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql");
-const bcrypt = require("bcrypt");
 const multer = require("multer");
 const path = require("path");
 require("dotenv").config();
@@ -101,7 +100,7 @@ app.post(
         console.log("Request Files:", req.files);
         return res.status(500).json({ error: err.message });
       }
-      return res.json("Partenaire added successfully");
+      return res.json("Partenaire ajouté avec succès");
     });
   }
 );
@@ -124,7 +123,7 @@ app.put(
         }
 
         if (results.length === 0) {
-          return res.status(404).json("Partenaire not found");
+          return res.status(404).json("Partenaire introuvable");
         }
 
         const oldPartenaire = results[0];
@@ -144,7 +143,7 @@ app.put(
             console.error("Error updating partenaire:", err);
             return res.status(500).json({ error: err.message });
           }
-          return res.json("Partenaire updated successfully");
+          return res.json("Partenaire mis à jour avec succès");
         });
       }
     );
@@ -160,7 +159,7 @@ app.delete("/login/partenaires/:id", (req, res) => {
       console.error("Error deleting partenaire:", err);
       return res.status(500).json({ error: err.message });
     }
-    return res.json("Partenaire deleted successfully");
+    return res.json("Partenaire supprimé avec succès");
   });
 });
 

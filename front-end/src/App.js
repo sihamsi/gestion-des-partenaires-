@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SignIn } from "./Componenets/SignIn/Signin";
 import Navbar from "./Componenets/Navbar/Navbar";
 import ForgotPassword from "./Componenets/ForgotPassword/ForgotPassword";
-
+import HomePage from "./Componenets/HomePage/HomePage";
 function App() {
   return (
     <div className="App">
@@ -16,6 +16,10 @@ function App() {
             element={<Navbar />}
           />
           <Route path="/forgotpass" element={<ForgotPassword />} />
+          <Route
+            path="/front-end/src/Componenets/HomePage"
+            element={<HomePage></HomePage>}
+          ></Route>
         </Routes>
       </BrowserRouter>
     </div>

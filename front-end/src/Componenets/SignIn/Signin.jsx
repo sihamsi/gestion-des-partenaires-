@@ -1,21 +1,20 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./Signin.css"; // Import the CSS file
-import password_icon from "../Assets/password.png"; // Import the password icon
-import email_icon from "../Assets/mail.png"; // Import the email icon
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import "./Signin.css";
+import password_icon from "../Assets/password.png";
+import email_icon from "../Assets/mail.png";
+import { useNavigate } from "react-router-dom";
 
 export function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Print payload to verify it
     const payload = { email, password };
     console.log("Payload being sent:", payload);
 
@@ -31,7 +30,7 @@ export function SignIn() {
       );
       console.log("Response data:", response.data);
       if (response.data === "Success") {
-        navigate("/front-end/src/Componenets/Navbar"); // Navigate to the Navbar page after successful login
+        navigate("/front-end/src/Componenets/HomePage");
       } else {
         setError("No record existed");
       }
@@ -43,7 +42,7 @@ export function SignIn() {
   };
 
   const handleForgotPassword = () => {
-    navigate("/forgotpass"); // Navigate to forgot password page
+    navigate("/forgotpass");
   };
 
   return (

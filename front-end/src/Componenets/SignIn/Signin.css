@@ -2,13 +2,12 @@
 .container {
   display: flex;
   flex-direction: column;
-  margin: auto;
+  align-items: center; /* Center content horizontally */
   width: 550px;
   height: 550px;
-  margin-top: 150px;
+  margin: 150px auto; /* Center the container */
   background: #fff;
   padding-bottom: 30px;
-  margin-top: 30px;
 }
 
 /* Styles de base pour le corps de la page */
@@ -20,7 +19,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
-  color: #6c946f; /* Notez le dièse (#) pour la couleur hexadécimale */
+  color: #6c946f;
   background: #36ba98;
 }
 
@@ -37,7 +36,6 @@ body {
 .text {
   color: #50b498;
   font-size: 48px;
-  align-items: center;
   font-weight: 700;
 }
 
@@ -54,12 +52,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  align-items: center; /* Center inputs horizontally */
 }
 
 .input {
   display: flex;
   align-items: center;
-  margin: auto;
   width: 480px;
   height: 80px;
   background: #eaeaee;
@@ -87,7 +85,6 @@ body {
   margin-top: 10px;
   color: #797979;
   font-size: 18px;
-  margin-right: 0px;
 }
 
 input::placeholder {
@@ -99,17 +96,33 @@ input::placeholder {
   cursor: pointer;
 }
 
+.Remember-forgot-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 480px; /* Match input width */
+  color: #797979;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.Remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.Check-box {
+  margin-right: 5px; /* Space between checkbox and label */
+}
+
 .submit-container {
   display: flex;
-  gap: 30px;
-  margin: 60px auto;
+  justify-content: center; /* Center button horizontally */
+  width: 100%; /* Ensure it takes full width */
+  margin-top: 20px; /* Add space above button */
 }
+
 .submit-button {
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  margin-left: 450px;
-  margin-top: 5px;
   width: 220px;
   height: 59px;
   color: #fff;
@@ -119,61 +132,19 @@ input::placeholder {
   font-weight: 700;
   cursor: pointer;
   border: none;
-}
-.Remember-forgot-container {
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  margin-top: -20px;
-  margin-left: -30px;
-  color: #797979;
-  font-size: 18px;
-}
-
-.Remember-me {
-  display: flex;
-  padding-left: 62px;
-  margin-top: 10px;
-  margin-right: 75px;
-  color: #797979;
-  font-size: 18px;
-}
-
-.Check-box {
-  margin-left: 0px;
+  justify-content: center;
+  align-items: center; /* Center text inside button */
 }
 
 .submit-button:hover {
   opacity: 0.6;
 }
 
-.click-here:hover {
-  opacity: 0.5;
-}
-
-.Sign-in {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-}
 .error {
-  color: red; /* Couleur du texte pour les messages d'erreur */
+  color: red;
   font-size: 14px;
   margin-top: -20px;
   text-align: left;
   margin-left: 20px;
-}
-
-/* Style de base pour le corps de la page (dupliqué pour une couleur de fond différente) */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 100vh;
-  color: #6c946f; /* Notez le dièse (#) pour la couleur hexadécimale */
-  background: #2c907c;
 }
